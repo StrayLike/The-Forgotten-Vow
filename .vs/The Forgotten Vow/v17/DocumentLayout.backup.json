@@ -7,12 +7,12 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Inventory\\InventoryCursor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventorySlotUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Inventory\\InventorySlotUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventoryManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Inventory\\InventoryManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventorySlotUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Inventory\\InventorySlotUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventoryUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -52,22 +52,23 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\Inventory\\InventoryCursor.cs",
               "ToolTip": "C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventoryCursor.cs",
               "RelativeToolTip": "Assets\\Scripts\\Inventory\\InventoryCursor.cs",
-              "ViewState": "AgIAADAAAAAAAAAAAAAAAEYAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-28T15:34:39.745Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "InventorySlotUI.cs",
               "DocumentMoniker": "C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventorySlotUI.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Inventory\\InventorySlotUI.cs",
               "ToolTip": "C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventorySlotUI.cs",
               "RelativeToolTip": "Assets\\Scripts\\Inventory\\InventorySlotUI.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAACMAAAA1AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-22T17:17:36.824Z"
+              "WhenOpened": "2025-09-22T17:17:36.824Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -106,15 +107,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "InventoryManager.cs",
               "DocumentMoniker": "C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventoryManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Inventory\\InventoryManager.cs",
               "ToolTip": "C:\\Users\\\u041C\u0430\u043A\u0441\u0438\u043C\\The Forgotten Vow\\Assets\\Scripts\\Inventory\\InventoryManager.cs",
               "RelativeToolTip": "Assets\\Scripts\\Inventory\\InventoryManager.cs",
-              "ViewState": "AgIAAHsAAAAAAAAAAAAgwJYAAAAGAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-16T16:15:12.061Z"
+              "WhenOpened": "2025-09-16T16:15:12.061Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
