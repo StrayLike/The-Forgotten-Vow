@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 361e397d7f09a8940b12ece2e74cae99, type: 3}
-  m_Name: Sword
+  m_Name: Apple_it
   m_EditorClassIdentifier: 
-  itemName: Sword
-  icon: {fileID: 21300000, guid: d8c358b6495e6454a9df322e3b642a27, type: 3}
-  itemType: 0
-  isStackable: 0
-  itemPrefab: {fileID: 7631687369866119316, guid: c98cb2cbad76fbe47a0026d881d03603, type: 3}
+  itemName: Apple
+  icon: {fileID: 21300000, guid: 98136687f5dcf66408efe5eb9f35c8a6, type: 3}
+  itemType: 6
+  isStackable: 1
+  itemPrefab: {fileID: 3285563611043790095, guid: 8d8095ad796cf154097a167b1bb727c8, type: 3}
