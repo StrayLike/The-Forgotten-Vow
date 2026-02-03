@@ -40,68 +40,71 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    // ����� ��� ��������� �������� � ��������
-    public bool AddItem(Item itemToAdd)
+    public int AddItem(Item item, int amount = 1)
     {
-        // 1. �������� ����������, �� ����� ��������� �������
-        if (itemToAdd.isStackable)
-        {
-            // ������ ���� � �������� ��� ����������
-            foreach (InventorySlot slot in inventorySlots)
-            {
-                if (slot.item == itemToAdd)
-                {
-                    slot.AddToStack(1);
-                    Debug.Log($"������� {itemToAdd.itemName} ������ � ���� � ��������.");
-                    NotifyUI();
-                    return true;
-                }
-            }
+        int remaining = amount;
 
-            // ������ ���� � ������ ��� ����������
-            foreach (InventorySlot slot in hotbarSlots)
-            {
-                if (slot.item == itemToAdd)
-                {
-                    slot.AddToStack(1);
-                    Debug.Log($"������� {itemToAdd.itemName} ������ � ���� � ������.");
-                    NotifyUI();
-                    return true;
-                }
-            }
+        // 1. Якщо предмет стакається, спочатку заповнюємо існуючі слоти
+        if (item.isStackable)
+        {
+            remaining = FillExistingStacks(item, remaining);
         }
 
-        // 2. ���� �� ����� ��������� ��� ���� ���� � �����, ������ ������ ����
-
-        // ������ �������� ���� � ��������� ��������
-        for (int i = 0; i < inventorySlots.Count; i++)
+        // 2. Якщо ще щось залишилося, шукаємо порожні слоти
+        if (remaining > 0)
         {
-            if (inventorySlots[i].item == null)
-            {
-                inventorySlots[i].item = itemToAdd;
-                inventorySlots[i].stackSize = 1;
-                Debug.Log($"������� {itemToAdd.itemName} ������ � ��������.");
-                NotifyUI();
-                return true;
-            }
+            remaining = FillEmptySlots(item, remaining);
         }
 
-        // ������ �������� ���� � ������ (���� �������� ������)
-        for (int i = 0; i < hotbarSlots.Count; i++)
+        // Оновлюємо UI, якщо хоча б один предмет було додано
+        if (remaining < amount && onInventoryChangedCallback != null)
         {
-            if (hotbarSlots[i].item == null)
-            {
-                hotbarSlots[i].item = itemToAdd;
-                hotbarSlots[i].stackSize = 1;
-                Debug.Log($"������� {itemToAdd.itemName} ������ � ������ (�������� ��� ������).");
-                NotifyUI();
-                return true;
-            }
+            onInventoryChangedCallback.Invoke();
         }
 
-        // ���� � ��������, � ������ �����
-        Debug.Log("�������� � ������ �����!");
-        return false;
+        return amount - remaining; // Повертаємо, скільки реально взяли
+    }
+
+    private int FillExistingStacks(Item item, int amount)
+    {
+        // Об'єднуємо всі слоти в один список для зручного пошуку
+        List<InventorySlot> allSlots = new List<InventorySlot>(inventorySlots);
+        allSlots.AddRange(hotbarSlots);
+
+        foreach (var slot in allSlots)
+        {
+            if (slot.item == item && slot.stackSize < item.maxStackSize)
+            {
+                int canAdd = item.maxStackSize - slot.stackSize;
+                int toAdd = Mathf.Min(canAdd, amount);
+
+                slot.stackSize += toAdd;
+                amount -= toAdd;
+
+                if (amount <= 0) return 0;
+            }
+        }
+        return amount;
+    }
+
+    private int FillEmptySlots(Item item, int amount)
+    {
+        List<InventorySlot> allSlots = new List<InventorySlot>(inventorySlots);
+        allSlots.AddRange(hotbarSlots);
+
+        foreach (var slot in allSlots)
+        {
+            if (slot.item == null)
+            {
+                int toAdd = Mathf.Min(item.maxStackSize, amount);
+                slot.item = item;
+                slot.stackSize = toAdd;
+                amount -= toAdd;
+
+                if (amount <= 0) return 0;
+            }
+        }
+        return amount;
     }
 
     // �����, ��� ��������� ��������� UI

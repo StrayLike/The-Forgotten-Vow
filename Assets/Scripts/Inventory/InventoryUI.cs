@@ -41,26 +41,29 @@ public class InventoryUI : MonoBehaviour
     }
 
     public void UpdateUI()
-{
-    if (inventoryManager == null) return;
-
-    // Оновлення Хотбару
-    for (int i = 0; i < hotbarSlotsUI.Length; i++)
     {
-        if (i < inventoryManager.hotbarSlots.Count)
+        if (inventoryManager == null) return;
+
+        // 1. Оновлення Хотбару
+        for (int i = 0; i < hotbarSlotsUI.Length; i++)
         {
-            // Ми передаємо саме об'єкт InventorySlot
-            hotbarSlotsUI[i].AddItem(inventoryManager.hotbarSlots[i]);
+            if (i < inventoryManager.hotbarSlots.Count)
+            {
+                hotbarSlotsUI[i].AddItem(inventoryManager.hotbarSlots[i]);
+                // Виправляємо назву тут:
+                hotbarSlotsUI[i].UpdateSelection();
+            }
+        }
+
+        // 2. Оновлення Інвентарю
+        for (int i = 0; i < inventorySlotsUI.Length; i++)
+        {
+            if (i < inventoryManager.inventorySlots.Count)
+            {
+                inventorySlotsUI[i].AddItem(inventoryManager.inventorySlots[i]);
+                // Виправляємо назву тут: замість slots[i] пишемо inventorySlotsUI[i]
+                inventorySlotsUI[i].UpdateSelection();
+            }
         }
     }
-
-    // Оновлення Інвентарю
-    for (int i = 0; i < inventorySlotsUI.Length; i++)
-    {
-        if (i < inventoryManager.inventorySlots.Count)
-        {
-            inventorySlotsUI[i].AddItem(inventoryManager.inventorySlots[i]);
-        }
-    }
-}
 }

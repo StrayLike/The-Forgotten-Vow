@@ -9,6 +9,7 @@ public class Item : ScriptableObject
     public ItemType itemType;
     public bool isStackable = true;
     public GameObject itemPrefab;
+    public int maxStackSize = 20;
 }
 
 // ������ ���� ��������

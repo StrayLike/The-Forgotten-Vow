@@ -10,6 +10,9 @@ public class InventorySlotUI : MonoBehaviour
     public InventorySlot currentSlot;
     public int slotIndex;
     public bool isHotbarSlot;
+    [Header("Виділення")]
+    public GameObject selectionPanel;
+    public GameObject mouseSelectionPanel;
 
     public void AddItem(InventorySlot slot)
     {
@@ -28,6 +31,26 @@ public class InventorySlotUI : MonoBehaviour
         else
         {
             ClearSlot();
+        }
+    }
+
+    public void UpdateSelection()
+    {
+        // Якщо скрипт взаємодії ще не прокинувся, виходимо
+        if (InventoryInteraction.Instance == null) return;
+
+        // Перевіряємо рамку активного хотбару (1-5)
+        if (selectionPanel != null)
+        {
+            bool isActive = InventoryInteraction.Instance.IsHotbarActive(slotIndex, isHotbarSlot);
+            selectionPanel.SetActive(isActive);
+        }
+
+        // Перевіряємо рамку вибору мишкою
+        if (mouseSelectionPanel != null)
+        {
+            bool isSelected = InventoryInteraction.Instance.IsMouseSelected(slotIndex, isHotbarSlot);
+            mouseSelectionPanel.SetActive(isSelected);
         }
     }
 
