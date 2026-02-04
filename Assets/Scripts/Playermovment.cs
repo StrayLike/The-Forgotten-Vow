@@ -131,7 +131,8 @@ public class Playermovment : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer <= 0 && !isWallSliding && !isCrouching)
+        // ÊÍÎÏÊÀ ÏÎÌ²ÍßÍÀ Ç LeftShift ÍÀ LeftAlt ÒÓÒ
+        if (Input.GetKeyDown(KeyCode.LeftAlt) && dashCooldownTimer <= 0 && !isWallSliding && !isCrouching)
         {
             StartDash();
         }
