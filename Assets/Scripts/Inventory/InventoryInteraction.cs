@@ -104,15 +104,29 @@ public class InventoryInteraction : MonoBehaviour
         lastClickTime = Time.time;
 
         var manager = InventoryManager.Instance;
+        List<InventorySlot> clickedList = clickedHotbar ? manager.hotbarSlots : manager.inventorySlots;
 
+        // ШВИДКЕ ПЕРЕМІЩЕННЯ (SHIFT + CLICK)
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            if (clickedList[index].item != null)
+            {
+                // Якщо тиснули на хотбар — перекидаємо в інвентар, і навпаки
+                List<InventorySlot> targetList = clickedHotbar ? manager.inventorySlots : manager.hotbarSlots;
+                MoveToFirstFreeSlot(clickedList[index], targetList);
+                manager.onInventoryChangedCallback.Invoke();
+                return;
+            }
+        }
+
+        // ЛОГІКА ОБМІНУ (ТВІЙ ІСНУЮЧИЙ КОД)
         if (selectedIndex == index && isFromHotbar == clickedHotbar)
         {
             selectedIndex = -1;
         }
         else if (selectedIndex == -1)
         {
-            List<InventorySlot> currentList = clickedHotbar ? manager.hotbarSlots : manager.inventorySlots;
-            if (currentList[index].item != null)
+            if (clickedList[index].item != null)
             {
                 selectedIndex = index;
                 isFromHotbar = clickedHotbar;
@@ -120,11 +134,39 @@ public class InventoryInteraction : MonoBehaviour
         }
         else
         {
-            // ВИКЛИК МЕТОДУ, ЯКИЙ БУВ ВІДСУТНІЙ:
             ExecuteAction(selectedIndex, isFromHotbar, index, clickedHotbar);
             selectedIndex = -1;
         }
         manager.onInventoryChangedCallback.Invoke();
+    }
+
+    // Допоміжний метод для Shift-кліку
+    void MoveToFirstFreeSlot(InventorySlot sourceSlot, List<InventorySlot> targetList)
+    {
+        foreach (var targetSlot in targetList)
+        {
+            // 1. Намагаємося додати в існуючий стак
+            if (targetSlot.item == sourceSlot.item && targetSlot.item.isStackable)
+            {
+                int canAdd = targetSlot.item.maxStackSize - targetSlot.stackSize;
+                int toAdd = Mathf.Min(canAdd, sourceSlot.stackSize);
+                targetSlot.stackSize += toAdd;
+                sourceSlot.stackSize -= toAdd;
+                if (sourceSlot.stackSize <= 0) { sourceSlot.item = null; return; }
+            }
+        }
+        // 2. Якщо не стакається або залишилося — кладемо в першу порожню клітинку
+        foreach (var targetSlot in targetList)
+        {
+            if (targetSlot.item == null)
+            {
+                targetSlot.item = sourceSlot.item;
+                targetSlot.stackSize = sourceSlot.stackSize;
+                sourceSlot.item = null;
+                sourceSlot.stackSize = 0;
+                return;
+            }
+        }
     }
 
     // ТОЙ САМИЙ МЕТОД ExecuteAction
