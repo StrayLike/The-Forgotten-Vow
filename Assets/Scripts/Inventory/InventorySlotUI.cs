@@ -13,6 +13,7 @@ public class InventorySlotUI : MonoBehaviour
     [Header("Виділення")]
     public GameObject selectionPanel;
     public GameObject mouseSelectionPanel;
+    public bool isChestSlot;
 
     public void AddItem(InventorySlot slot)
     {
@@ -36,22 +37,13 @@ public class InventorySlotUI : MonoBehaviour
 
     public void UpdateSelection()
     {
-        // Якщо скрипт взаємодії ще не прокинувся, виходимо
         if (InventoryInteraction.Instance == null) return;
 
-        // Перевіряємо рамку активного хотбару (1-5)
         if (selectionPanel != null)
-        {
-            bool isActive = InventoryInteraction.Instance.IsHotbarActive(slotIndex, isHotbarSlot);
-            selectionPanel.SetActive(isActive);
-        }
+            selectionPanel.SetActive(InventoryInteraction.Instance.IsHotbarActive(slotIndex, isHotbarSlot));
 
-        // Перевіряємо рамку вибору мишкою
         if (mouseSelectionPanel != null)
-        {
-            bool isSelected = InventoryInteraction.Instance.IsMouseSelected(slotIndex, isHotbarSlot);
-            mouseSelectionPanel.SetActive(isSelected);
-        }
+            mouseSelectionPanel.SetActive(InventoryInteraction.Instance.IsMouseSelected(slotIndex, isHotbarSlot, isChestSlot));
     }
 
     public void ClearSlot()
@@ -68,13 +60,8 @@ public class InventorySlotUI : MonoBehaviour
     public void ClickOnSlot()
     {
         if (InventoryInteraction.Instance != null)
-        {
-            InventoryInteraction.Instance.OnSlotClicked(slotIndex, isHotbarSlot);
-        }
+            InventoryInteraction.Instance.OnSlotClicked(slotIndex, isHotbarSlot, isChestSlot);
 
-        if (EventSystem.current != null)
-        {
-            EventSystem.current.SetSelectedGameObject(null);
-        }
+        if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
     }
 }

@@ -6,17 +6,20 @@ public class InventoryInteraction : MonoBehaviour
     public static InventoryInteraction Instance;
 
     [Header("Налаштування")]
-    public float clickCooldown = 0.5f;
-
-    [Header("Посилання")]
+    public float clickCooldown = 0.2f;
     public Transform playerTransform;
     public float throwForce = 4f;
 
-    [Header("Стан Хотбару")]
+    [Header("UI та Стан")]
+    public GameObject chestPanel;
+    public GameObject mainInventoryPanel;
     public int activeHotbarIndex = 0;
 
+    [Header("Поточна скриня")]
+    public Chest currentChest;
     private int selectedIndex = -1;
     private bool isFromHotbar = false;
+    private bool isFromChest = false;
     private float lastClickTime;
 
     void Awake() => Instance = this;
@@ -33,179 +36,206 @@ public class InventoryInteraction : MonoBehaviour
             }
         }
 
-        // 2. Викидання на Q
+        // 2. Керування клавішею E
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (currentChest != null)
+            {
+                CloseChest();
+                if (mainInventoryPanel != null) mainInventoryPanel.SetActive(false);
+            }
+            else if (mainInventoryPanel != null)
+            {
+                mainInventoryPanel.SetActive(!mainInventoryPanel.activeSelf);
+                if (mainInventoryPanel.activeSelf)
+                {
+                    InventoryManager.Instance.onInventoryChangedCallback.Invoke();
+                }
+            }
+        }
+
+        // 3. Автоматичне закриття скрині
+        if (currentChest != null && playerTransform != null)
+        {
+            float dist = Vector2.Distance(playerTransform.position, currentChest.transform.position);
+            if (dist > 2.5f)
+            {
+                CloseChest();
+                if (mainInventoryPanel != null) mainInventoryPanel.SetActive(false);
+            }
+        }
+
+        // 4. Логіка викидання на Q
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            bool dropAll = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            DropItemFromHotbar(activeHotbarIndex, dropAll);
+            // Якщо ми вибрали предмет мишкою (він підсвічений) - викидаємо його
+            if (selectedIndex != -1)
+            {
+                DropSelectedItem();
+            }
+            else
+            {
+                // Якщо нічого не вибрано - викидаємо предмет з активного слота хотбару
+                DropItemFromHotbar(activeHotbarIndex);
+            }
         }
     }
 
-    // --- МЕТОДИ ВИКИДАННЯ ---
-
-    void DropItemFromHotbar(int index, bool all)
-    {
-        var manager = InventoryManager.Instance;
-        InventorySlot slot = manager.hotbarSlots[index];
-        if (slot.item != null) PerformDrop(slot, all);
-    }
-
+    // --- НОВИЙ МЕТОД: Викидання вибраного мишкою предмета ---
     public void DropSelectedItem()
     {
         if (selectedIndex == -1) return;
-        var manager = InventoryManager.Instance;
-        List<InventorySlot> currentList = isFromHotbar ? manager.hotbarSlots : manager.inventorySlots;
-        InventorySlot slot = currentList[selectedIndex];
+
+        List<InventorySlot> selectedList = GetList(isFromHotbar, isFromChest);
+        InventorySlot slot = selectedList[selectedIndex];
 
         if (slot.item != null)
         {
-            PerformDrop(slot, true);
-            selectedIndex = -1;
+            InventoryManager.Instance.DropItem(slot);
+            selectedIndex = -1; // Скидаємо виділення після викидання
+            InventoryManager.Instance.onInventoryChangedCallback.Invoke();
         }
     }
 
-    void PerformDrop(InventorySlot slot, bool all)
+    // --- ІСНУЮЧИЙ МЕТОД: Викидання з хотбару (для Q без виділення) ---
+    public void DropItemFromHotbar(int index)
     {
-        int amountToDrop = all ? slot.stackSize : 1;
-        SpawnItemWorld(slot.item, amountToDrop);
+        InventorySlot slot = InventoryManager.Instance.hotbarSlots[index];
+        if (slot.item != null)
+        {
+            InventoryManager.Instance.DropItem(slot);
+            InventoryManager.Instance.onInventoryChangedCallback.Invoke();
+        }
+    }
 
-        slot.stackSize -= amountToDrop;
-        if (slot.stackSize <= 0) slot.item = null;
-
+    // Решта методів без змін...
+    public void OpenChest(Chest chest)
+    {
+        currentChest = chest;
+        if (chestPanel != null) chestPanel.SetActive(true);
+        if (mainInventoryPanel != null) mainInventoryPanel.SetActive(true);
         InventoryManager.Instance.onInventoryChangedCallback.Invoke();
     }
 
-    void SpawnItemWorld(Item item, int amount)
+    public void CloseChest()
     {
-        Vector3 dropPos = playerTransform.position + playerTransform.up * 1.0f;
-        GameObject droppedObj = Instantiate(item.itemPrefab, dropPos, Quaternion.identity);
-
-        ItemPickup pickup = droppedObj.GetComponent<ItemPickup>();
-        if (pickup != null)
+        if (currentChest != null)
         {
-            pickup.item = item;
-            pickup.amount = amount;
-            pickup.StartPickupDelay();
+            currentChest.CloseChestVisual(); // Це вимкне прапорець isOpen і поверне закритий спрайт
         }
-
-        Rigidbody2D rb = droppedObj.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            Vector2 throwDir = Random.insideUnitCircle.normalized;
-            rb.AddForce(throwDir * throwForce, ForceMode2D.Impulse);
-        }
+        currentChest = null;
+        if (chestPanel != null) chestPanel.SetActive(false);
+        InventoryManager.Instance.onInventoryChangedCallback.Invoke(); // Оновлюємо UI
     }
 
-    // --- ЛОГІКА КЛІКІВ ТА ОБМІНУ ---
-
-    public void OnSlotClicked(int index, bool clickedHotbar)
+    public void OnSlotClicked(int index, bool clickedHotbar, bool clickedChest)
     {
         if (Time.time - lastClickTime < clickCooldown) return;
         lastClickTime = Time.time;
 
         var manager = InventoryManager.Instance;
-        List<InventorySlot> clickedList = clickedHotbar ? manager.hotbarSlots : manager.inventorySlots;
+        List<InventorySlot> clickedList = GetList(clickedHotbar, clickedChest);
 
-        // ШВИДКЕ ПЕРЕМІЩЕННЯ (SHIFT + CLICK)
         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
             if (clickedList[index].item != null)
             {
-                // Якщо тиснули на хотбар — перекидаємо в інвентар, і навпаки
-                List<InventorySlot> targetList = clickedHotbar ? manager.inventorySlots : manager.hotbarSlots;
-                MoveToFirstFreeSlot(clickedList[index], targetList);
+                HandleShiftClick(clickedList[index], clickedChest);
                 manager.onInventoryChangedCallback.Invoke();
                 return;
             }
         }
 
-        // ЛОГІКА ОБМІНУ (ТВІЙ ІСНУЮЧИЙ КОД)
-        if (selectedIndex == index && isFromHotbar == clickedHotbar)
-        {
-            selectedIndex = -1;
-        }
-        else if (selectedIndex == -1)
+        if (selectedIndex == -1)
         {
             if (clickedList[index].item != null)
             {
                 selectedIndex = index;
                 isFromHotbar = clickedHotbar;
+                isFromChest = clickedChest;
             }
         }
         else
         {
-            ExecuteAction(selectedIndex, isFromHotbar, index, clickedHotbar);
+            ExecuteAction(selectedIndex, isFromHotbar, isFromChest, index, clickedHotbar, clickedChest);
             selectedIndex = -1;
         }
         manager.onInventoryChangedCallback.Invoke();
+        if (currentChest != null)
+        {
+            currentChest.UpdateChestVisual();
+        }
     }
 
-    // Допоміжний метод для Shift-кліку
-    void MoveToFirstFreeSlot(InventorySlot sourceSlot, List<InventorySlot> targetList)
+    private List<InventorySlot> GetList(bool hotbar, bool chest)
     {
-        foreach (var targetSlot in targetList)
+        if (chest && currentChest != null) return currentChest.chestSlots;
+        return hotbar ? InventoryManager.Instance.hotbarSlots : InventoryManager.Instance.inventorySlots;
+    }
+
+    void HandleShiftClick(InventorySlot slot, bool fromChest)
+    {
+        var manager = InventoryManager.Instance;
+        if (fromChest)
+            MoveToFirstFree(slot, manager.inventorySlots);
+        else if (currentChest != null)
+            MoveToFirstFree(slot, currentChest.chestSlots);
+        else
+            MoveToFirstFree(slot, isFromHotbar ? manager.inventorySlots : manager.hotbarSlots);
+    }
+
+    void MoveToFirstFree(InventorySlot source, List<InventorySlot> target)
+    {
+        foreach (var slot in target)
         {
-            // 1. Намагаємося додати в існуючий стак
-            if (targetSlot.item == sourceSlot.item && targetSlot.item.isStackable)
+            if (slot.item == source.item && slot.item.isStackable)
             {
-                int canAdd = targetSlot.item.maxStackSize - targetSlot.stackSize;
-                int toAdd = Mathf.Min(canAdd, sourceSlot.stackSize);
-                targetSlot.stackSize += toAdd;
-                sourceSlot.stackSize -= toAdd;
-                if (sourceSlot.stackSize <= 0) { sourceSlot.item = null; return; }
+                int canAdd = slot.item.maxStackSize - slot.stackSize;
+                int toAdd = Mathf.Min(canAdd, source.stackSize);
+                slot.stackSize += toAdd;
+                source.stackSize -= toAdd;
+                if (source.stackSize <= 0) { source.item = null; return; }
             }
         }
-        // 2. Якщо не стакається або залишилося — кладемо в першу порожню клітинку
-        foreach (var targetSlot in targetList)
+        foreach (var slot in target)
         {
-            if (targetSlot.item == null)
+            if (slot.item == null)
             {
-                targetSlot.item = sourceSlot.item;
-                targetSlot.stackSize = sourceSlot.stackSize;
-                sourceSlot.item = null;
-                sourceSlot.stackSize = 0;
+                slot.item = source.item;
+                slot.stackSize = source.stackSize;
+                source.item = null;
+                source.stackSize = 0;
                 return;
             }
         }
     }
 
-    // ТОЙ САМИЙ МЕТОД ExecuteAction
-    void ExecuteAction(int idxA, bool wasHotbarA, int idxB, bool isHotbarB)
+    void ExecuteAction(int idxA, bool hotA, bool chestA, int idxB, bool hotB, bool chestB)
     {
-        var manager = InventoryManager.Instance;
-        List<InventorySlot> listA = wasHotbarA ? manager.hotbarSlots : manager.inventorySlots;
-        List<InventorySlot> listB = isHotbarB ? manager.hotbarSlots : manager.inventorySlots;
+        List<InventorySlot> listA = GetList(hotA, chestA);
+        List<InventorySlot> listB = GetList(hotB, chestB);
 
         InventorySlot slotA = listA[idxA];
         InventorySlot slotB = listB[idxB];
 
-        // 1. Логіка стакання
         if (slotB.item != null && slotA.item == slotB.item && slotB.item.isStackable)
         {
-            int max = slotB.item.maxStackSize;
-            int canAdd = max - slotB.stackSize;
-            int toAdd = Mathf.Min(canAdd, slotA.stackSize);
-
+            int toAdd = Mathf.Min(slotB.item.maxStackSize - slotB.stackSize, slotA.stackSize);
             slotB.stackSize += toAdd;
             slotA.stackSize -= toAdd;
-
             if (slotA.stackSize <= 0) slotA.item = null;
         }
-        // 2. Логіка звичайного обміну
         else
         {
             Item tempItem = slotA.item;
             int tempSize = slotA.stackSize;
-
             slotA.item = slotB.item;
             slotA.stackSize = slotB.stackSize;
-
             slotB.item = tempItem;
             slotB.stackSize = tempSize;
         }
     }
 
-    // ПЕРЕВІРКИ ДЛЯ UI
-    public bool IsHotbarActive(int index, bool isHotbar) => isHotbar && index == activeHotbarIndex;
-    public bool IsMouseSelected(int index, bool isHotbar) => index == selectedIndex && isHotbar == isFromHotbar;
+    public bool IsHotbarActive(int index, bool hotbar) => hotbar && index == activeHotbarIndex;
+    public bool IsMouseSelected(int index, bool hotbar, bool chest) => index == selectedIndex && hotbar == isFromHotbar && chest == isFromChest;
 }
