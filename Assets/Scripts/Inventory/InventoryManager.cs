@@ -116,38 +116,25 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    // Метод для викидання предмета
     public void DropItem(InventorySlot slot)
+{
+    if (slot.item == null) return;
+
+    // Шукаємо гравця
+    GameObject player = GameObject.FindGameObjectWithTag("Player");
+    if (player != null)
     {
-        if (slot.item == null) return;
-
-        // Шукаємо гравця
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            // Створюємо предмет трохи вище гравця
-            GameObject dropped = Instantiate(slot.item.itemPrefab, player.transform.position + Vector3.up, Quaternion.identity);
-
-            // Отримуємо компонент підбору на новому об'єкті
-            ItemPickup pickup = dropped.GetComponent<ItemPickup>();
-            if (pickup != null)
-            {
-                pickup.item = slot.item; // Передаємо тип предмета
-                pickup.amount = slot.stackSize; // Передаємо кількість
-                pickup.StartPickupDelay(); // АКТИВУЄМО ЗАТРИМКУ 2 СЕКУНДИ
-            }
-
-            // Додаємо невеликий імпульс при викиданні, щоб предмет відлітав убік
-            Rigidbody2D rb = dropped.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                float lookDir = player.transform.localScale.x > 0 ? 1f : -1f;
-                rb.AddForce(new Vector2(lookDir, 1f) * 3f, ForceMode2D.Impulse);
-            }
-        }
-
-        // Очищаємо слот після викидання
-        slot.item = null;
-        slot.stackSize = 0;
-        NotifyUI();
+        // Створюємо предмет перед гравцем
+        GameObject dropped = Instantiate(slot.item.itemPrefab, player.transform.position + Vector3.up, Quaternion.identity);
+        
+        // Визначаємо напрямок (куди дивиться гравець)
+        float lookDir = player.transform.localScale.x > 0 ? 1f : -1f;
+      
     }
+
+    slot.item = null;
+    slot.stackSize = 0;
+    NotifyUI();
+}
 }
